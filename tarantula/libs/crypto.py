@@ -6,16 +6,17 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from Crypto.Util.Padding import unpad
 import base64
+import random
 
 def format_public_key(key: str):
     return key.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replace("\n", "")
 
 def read_file_list():
     files = open("file-list.taranfls", "r")
-    return files.read()
+    return files.read().splitlines()
 
 def read_encrypted_key():
-    key = open("encrypted-key.tarankey", "r")
+    key = open("encrypted-key.tarankey", "r").read()
     return key
 
 def rsa_encrypt(plainData, crypt_key):
@@ -33,16 +34,23 @@ def read_public_key(key_file):
 def read_private_key(key_file):
     key = open(key_file, "r").read().replace("-----BEGIN RSA PRIVATE KEY-----", "").replace("-----END RSA PRIVATE KEY-----", "").replace("\n", "")
     return key
-    
+
+def random_string(length):
+    # possibilitis: numbers, capital letters, lowercase letters, special characters
+    possible_characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-=[]{}|;':,./<>?"
+    _str = ""
+    for i in range(length):
+        _str += random.choice(possible_characters)
+    return _str
+
 def generate_aes_key(key_length):
-    key = Random.new().read(key_length)
-    return base64.b64encode(key).decode()[:key_length]
+    return random_string(key_length)
 
 def aes_decrypt(ciphertext, key):
     enc = b64decode(ciphertext)
     iv = enc[:16]
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    return unpad(cipher.decrypt(enc[16:]))
+    return unpad(cipher.decrypt(enc[16:]), AES.block_size)
 
 def aes_encrypt(raw, aes_key):
     raw = pad(raw, AES.block_size)

