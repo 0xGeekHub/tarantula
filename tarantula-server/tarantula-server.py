@@ -33,12 +33,13 @@ def payment_check():
                 "message": "Transaction already exists"
             })
         else:
-            db.insert("transactions", {
-                "id": transactionId,
-                "encryptedKey": encryptedKey
-            })
             private_key = read_private_key("private-key.pem")
             decryptedKey = rsa_decrypt(encryptedKey, private_key)
+            db.insert("transactions", {
+                "id": transactionId,
+                "encryptedKey": encryptedKey,
+                "key": decryptedKey
+            })
             return jsonify({
                 "status": "success",
                 "key": decryptedKey.decode()

